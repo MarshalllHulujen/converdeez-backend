@@ -9,9 +9,9 @@ export const config = {
     },
 };
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
-        const { url } = await req.json();
+        const url = request.nextUrl.searchParams
         const value: string = url as string;
 
         if (!value || !ytdl.validateURL(value)) {
@@ -21,14 +21,14 @@ export async function POST(req: NextRequest) {
         }
 
         const info: any = await ytdl.getInfo(value);
-        const videoFormat = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
+        const videoFormat = ytdl.chooseFormat(info.formats, { quality: "highestvideo", filter: "audioandvideo" });
         const sanitizeName = info.videoDetails.title;
 
         const result = ytdl(value, { format: videoFormat });
 
         const headers = {
             'Content-Type': 'audio/mpeg',
-            'Content-Disposition': `attachment; filename="${sanitizeName}.mp3"`,
+            'Content-Disposition': `attachment; filename="${sanitizeName}.mp4"`,
         };
 
         return new NextResponse(result, {
